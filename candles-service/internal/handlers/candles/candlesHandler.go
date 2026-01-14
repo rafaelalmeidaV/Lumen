@@ -1,34 +1,39 @@
 package candles
 
 import (
-	"meu-backend/internal/domain/candles"
+	"fmt"
+	candlesService "meu-backend/internal/domain/candles"
+	candlesDTO "meu-backend/internal/domain/candles/DTO"
+
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterCandlesRoutes(r *gin.Engine) {
+func RegisterCandlesRoutes(r *gin.Engine, service *candlesService.CandleService) {
 	routes := r.Group("/candles")
 	{
-		routes.POST("", createCandleHandler)
+		routes.POST("", func(c *gin.Context) {
+			createCandleHandler(c, service)
+		})
 	}
 }
 
-func createCandleHandler(c *gin.Context) {
-	var input candles.CandleCreateDTO
+func createCandleHandler(c *gin.Context, service *candlesService.CandleService) {
+	var input candlesDTO.CandleCreateDTO
 
 	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		fmt.Printf("Invalid request body: %v\n", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
 		return
 	}
 
-	expiresAt := time.Now().Add(time.Duration(input.DurationHours) * time.Hour)
+	if err := service.CreateCandle(c.Request.Context(), input); err != nil {
+		fmt.Printf("Service error: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create candle"})
+		return
+	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message":       "Vela acesa com sucesso",
-		"type":          input.Type,
-		"justification": input.Justification,
-		"expires_at":    expiresAt.Format(time.RFC3339),
-	})
+	fmt.Println("Candle created and sent to service layer")
+	c.JSON(http.StatusCreated, gin.H{"message": "Candle created successfully"})
 }
