@@ -2,6 +2,7 @@ package app
 
 import (
 	"log"
+	candlesRoutes "meu-backend/internal/handlers/candles"
 	healthRoutes "meu-backend/internal/handlers/health"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,7 @@ func NewApp() *App {
 	setupGlobalMiddlewares(r)
 
 	healthRoutes.RegisterLivenessReadinessRoutes(r)
+	candlesRoutes.RegisterCandlesRoutes(r)
 
 	return &App{router: r}
 }
