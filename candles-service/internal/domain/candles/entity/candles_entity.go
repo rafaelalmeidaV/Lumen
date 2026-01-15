@@ -1,7 +1,7 @@
 package entity
 
 import (
-	"meu-backend/internal/domain/candles/enums"
+	"candles-service/internal/domain/candles/enums"
 	"time"
 )
 

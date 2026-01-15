@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	candlesDTO "meu-backend/internal/domain/candles/DTO"
-	candlesEntity "meu-backend/internal/domain/candles/entity"
-	candleValidator "meu-backend/internal/domain/candles/validations"
+	candlesDTO "candles-service/internal/domain/candles/DTO"
+	candlesEntity "candles-service/internal/domain/candles/entity"
+	candleValidator "candles-service/internal/domain/candles/validations"
 )
 
 type CandleGateway interface {

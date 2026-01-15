@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	candlesEntity "meu-backend/internal/domain/candles/entity"
-	"meu-backend/internal/database/models"
+	"candles-service/internal/database/models"
+	candlesEntity "candles-service/internal/domain/candles/entity"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"

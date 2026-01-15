@@ -5,11 +5,11 @@ import (
 	"log"
 	"os"
 
-	"meu-backend/internal/database"
-	"meu-backend/internal/domain/candles"
-	candlesRoutes "meu-backend/internal/handlers/candles"
-	healthRoutes "meu-backend/internal/handlers/health"
-	repository "meu-backend/internal/repository/candle"
+	"candles-service/internal/database"
+	"candles-service/internal/domain/candles"
+	candlesRoutes "candles-service/internal/handlers/candles"
+	healthRoutes "candles-service/internal/handlers/health"
+	repository "candles-service/internal/repository/candle"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"

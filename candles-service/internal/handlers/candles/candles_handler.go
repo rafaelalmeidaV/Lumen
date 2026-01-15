@@ -1,9 +1,9 @@
 package candles
 
 import (
+	candlesService "candles-service/internal/domain/candles"
+	candlesDTO "candles-service/internal/domain/candles/DTO"
 	"fmt"
-	candlesService "meu-backend/internal/domain/candles"
-	candlesDTO "meu-backend/internal/domain/candles/DTO"
 
 	"net/http"
 

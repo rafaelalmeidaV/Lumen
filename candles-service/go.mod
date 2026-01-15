@@ -1,4 +1,4 @@
-module meu-backend
+module candles-service
 
 go 1.24.0
 

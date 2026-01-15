@@ -1,8 +1,8 @@
 package main
 
 import (
+	"candles-service/internal/app"
 	"log"
-	"meu-backend/internal/app"
 )
 
 func main() {

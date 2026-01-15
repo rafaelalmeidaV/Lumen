@@ -1,10 +1,10 @@
 package validations
 
 import (
+	candleCreateDTO "candles-service/internal/domain/candles/DTO"
+	"candles-service/internal/domain/candles/enums"
 	"errors"
 	"fmt"
-	candleCreateDTO "meu-backend/internal/domain/candles/DTO"
-	"meu-backend/internal/domain/candles/enums"
 )
 
 var ErrValidation = errors.New("validation error")

@@ -1,8 +1,8 @@
 package models
 
 import (
-	"meu-backend/internal/domain/candles/entity"
-	"meu-backend/internal/domain/candles/enums"
+	"candles-service/internal/domain/candles/entity"
+	"candles-service/internal/domain/candles/enums"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
