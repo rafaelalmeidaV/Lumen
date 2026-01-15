@@ -6,6 +6,7 @@ import (
 
 	candlesDTO "meu-backend/internal/domain/candles/DTO"
 	candlesEntity "meu-backend/internal/domain/candles/entity"
+	candleValidator "meu-backend/internal/domain/candles/validations"
 )
 
 type CandleGateway interface {
@@ -23,11 +24,15 @@ func NewCandleService(gw CandleGateway) *CandleService {
 }
 
 func (s *CandleService) CreateCandle(ctx context.Context, dto candlesDTO.CandleCreateDTO) error {
+	if err := candleValidator.IsValid(dto); err != nil {
+		return err
+	}
+
 	candle := &candlesEntity.Candle{
-		Type:          dto.Type,
+		Type:      dto.Type,
 		Intention: dto.Intention,
-		ExpiresAt:     time.Now().Add(time.Duration(dto.DurationHours) * time.Hour),
-		CreatedAt:     time.Now(),
+		ExpiresAt: time.Now().Add(time.Duration(dto.DurationHours) * time.Hour),
+		CreatedAt: time.Now(),
 	}
 
 	return s.gateway.Save(ctx, candle)

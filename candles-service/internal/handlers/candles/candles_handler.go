@@ -36,7 +36,7 @@ func createCandleHandler(c *gin.Context, service *candlesService.CandleService) 
 
 	if err := service.CreateCandle(c.Request.Context(), input); err != nil {
 		fmt.Printf("Service error: %v\n", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create candle"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

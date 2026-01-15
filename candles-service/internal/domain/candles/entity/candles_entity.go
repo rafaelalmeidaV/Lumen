@@ -1,12 +1,15 @@
 package entity
 
-import "time"
+import (
+	"meu-backend/internal/domain/candles/enums"
+	"time"
+)
 
 type Candle struct {
-	ID            string
-	Type          string
-	Description   string
-	Intention 	  string
-	ExpiresAt     time.Time
-	CreatedAt     time.Time
+	ID          string
+	Type        enums.CandleType
+	Description string
+	Intention   string
+	ExpiresAt   time.Time
+	CreatedAt   time.Time
 }

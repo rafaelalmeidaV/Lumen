@@ -2,18 +2,19 @@ package models
 
 import (
 	"meu-backend/internal/domain/candles/entity"
+	"meu-backend/internal/domain/candles/enums"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 type CandleModel struct {
-	ID          bson.ObjectID `bson:"_id,omitempty"`
-	Type        string        `bson:"type"`
-	Description string        `bson:"Description"`
-	Intention   string        `bson:"Intention"`
-	ExpiresAt   time.Time     `bson:"expires_at"`
-	CreatedAt   time.Time     `bson:"created_at"`
+	ID          bson.ObjectID    `bson:"_id,omitempty"`
+	Type        enums.CandleType `bson:"type"`
+	Description string           `bson:"Description"`
+	Intention   string           `bson:"Intention"`
+	ExpiresAt   time.Time        `bson:"expires_at"`
+	CreatedAt   time.Time        `bson:"created_at"`
 }
 
 func (m *CandleModel) ToEntity() *entity.Candle {
