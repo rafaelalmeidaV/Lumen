@@ -25,7 +25,7 @@ func NewCandleService(gw CandleGateway) *CandleService {
 func (s *CandleService) CreateCandle(ctx context.Context, dto candlesDTO.CandleCreateDTO) error {
 	candle := &candlesEntity.Candle{
 		Type:          dto.Type,
-		Justification: dto.Justification,
+		Intention: dto.Intention,
 		ExpiresAt:     time.Now().Add(time.Duration(dto.DurationHours) * time.Hour),
 		CreatedAt:     time.Now(),
 	}
