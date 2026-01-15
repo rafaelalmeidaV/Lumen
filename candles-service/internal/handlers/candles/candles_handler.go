@@ -16,6 +16,12 @@ func RegisterCandlesRoutes(r *gin.Engine, service *candlesService.CandleService)
 		routes.POST("", func(c *gin.Context) {
 			createCandleHandler(c, service)
 		})
+		routes.GET("/:id", func(c *gin.Context) {
+			getCandleByIDHandler(c, service)
+		})
+		routes.GET("", func(c *gin.Context) {
+			listCandlesHandler(c, service)
+		})
 	}
 }
 
@@ -36,4 +42,28 @@ func createCandleHandler(c *gin.Context, service *candlesService.CandleService) 
 
 	fmt.Println("Candle created and sent to service layer")
 	c.JSON(http.StatusCreated, gin.H{"message": "Candle created successfully"})
+}
+
+func getCandleByIDHandler(c *gin.Context, service *candlesService.CandleService) {
+	id := c.Param("id")
+
+	candle, err := service.GetCandleByID(c.Request.Context(), id)
+	if err != nil {
+		fmt.Printf("Service error: %v\n", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "Candle not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, candle)
+}
+
+func listCandlesHandler(c *gin.Context, service *candlesService.CandleService) {
+	candles, err := service.ListCandles(c.Request.Context())
+	if err != nil {
+		fmt.Printf("Service error: %v\n", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to list candles"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"candles": candles})
 }

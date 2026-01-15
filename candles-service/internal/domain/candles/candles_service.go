@@ -10,6 +10,8 @@ import (
 
 type CandleGateway interface {
 	Save(ctx context.Context, candle *candlesEntity.Candle) error
+	FindByID(ctx context.Context, id string) (*candlesEntity.Candle, error)
+	FindAll(ctx context.Context) ([]*candlesEntity.Candle, error)
 }
 
 type CandleService struct {
@@ -29,4 +31,12 @@ func (s *CandleService) CreateCandle(ctx context.Context, dto candlesDTO.CandleC
 	}
 
 	return s.gateway.Save(ctx, candle)
+}
+
+func (s *CandleService) GetCandleByID(ctx context.Context, id string) (*candlesEntity.Candle, error) {
+	return s.gateway.FindByID(ctx, id)
+}
+
+func (s *CandleService) ListCandles(ctx context.Context) ([]*candlesEntity.Candle, error) {
+	return s.gateway.FindAll(ctx)
 }
