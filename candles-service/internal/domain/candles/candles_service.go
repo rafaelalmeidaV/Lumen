@@ -32,6 +32,7 @@ func (s *CandleService) CreateCandle(ctx context.Context, dto candlesDTO.CandleC
         Type:          dto.Type,
         Intention:     dto.Intention,
         City:          dto.City,
+		State: 		   dto.State,
 		Description:   dto.Type.GetDescription(),
         ExpiresAt:     time.Now().Add(time.Duration(dto.DurationHours) * time.Hour),
         CreatedAt:     time.Now(),
