@@ -34,14 +34,16 @@ func createCandleHandler(c *gin.Context, service *candlesService.CandleService) 
 		return
 	}
 
-	if err := service.CreateCandle(c.Request.Context(), input); err != nil {
+	result, err := service.CreateCandle(c.Request.Context(), input)
+
+	if err != nil {
 		fmt.Printf("Service error: %v\n", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	fmt.Println("Candle created and sent to service layer")
-	c.JSON(http.StatusCreated, gin.H{"message": "Candle created successfully"})
+	c.JSON(http.StatusCreated, result)
 }
 
 func getCandleByIDHandler(c *gin.Context, service *candlesService.CandleService) {
