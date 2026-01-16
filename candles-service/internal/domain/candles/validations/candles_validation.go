@@ -16,6 +16,7 @@ func IsValid(dto candleCreateDTO.CandleCreateDTO) error {
 		validateType,
 		validateDuration,
 		validateIntention,
+		validateState,
 	}
 
 	for _, fn := range validators {
@@ -47,4 +48,14 @@ func validateIntention(dto candleCreateDTO.CandleCreateDTO) error {
 		return errors.New("intention is too short")
 	}
 	return nil
+}
+
+func validateState(dto candleCreateDTO.CandleCreateDTO) error {
+	switch dto.State {
+	case enums.AC, enums.AL, enums.AP, enums.AM, enums.BA, enums.CE, enums.DF, enums.ES, enums.GO,
+		enums.MA, enums.MT, enums.MS, enums.MG, enums.PA, enums.PB, enums.PR, enums.PE, enums.PI,
+		enums.RJ, enums.RN, enums.RS, enums.RO, enums.RR, enums.SC, enums.SP, enums.SE, enums.TO:
+		return nil
+	}
+	return fmt.Errorf("invalid brazil state: %s", dto.State)
 }

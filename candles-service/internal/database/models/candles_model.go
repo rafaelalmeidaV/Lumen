@@ -12,7 +12,7 @@ type CandleModel struct {
 	ID          bson.ObjectID    `bson:"_id,omitempty"`
 	Type        enums.CandleType `bson:"type"`
 	City        string           `bson:"city"`
-	State       string			 `bson:"state"`
+	State       enums.BrazilState`bson:"state"`
 	Description string           `bson:"Description"`
 	Intention   string           `bson:"Intention"`
 	ExpiresAt   time.Time        `bson:"expires_at"`

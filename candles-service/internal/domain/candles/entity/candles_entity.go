@@ -9,7 +9,7 @@ type Candle struct {
 	ID          string
 	Type        enums.CandleType
 	City        string
-	State		string
+	State       enums.BrazilState
 	Description string
 	Intention   string
 	ExpiresAt   time.Time
