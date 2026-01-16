@@ -11,6 +11,11 @@ var ErrValidation = errors.New("validation error")
 
 type candleValidator func(dto candleCreateDTO.CandleCreateDTO) error
 
+var validationTypeErrorNotExist = "invalid type: %s"
+var validationDurationLessThanZero = "duration must be greater than zero"
+var validationIntentionShort = "intention is too short"
+var validationInvalidState = "invalid brazil state: %s"
+
 func IsValid(dto candleCreateDTO.CandleCreateDTO) error {
 	validators := []candleValidator{
 		validateType,
@@ -33,19 +38,19 @@ func validateType(dto candleCreateDTO.CandleCreateDTO) error {
 	case enums.CandleTypeWhite, enums.CandleTypeRed, enums.CandleTypeGreen, enums.CandleTypePurple, enums.CandleTypePink:
 		return nil
 	}
-	return fmt.Errorf("invalid type: %s", dto.Type)
+	return fmt.Errorf(validationTypeErrorNotExist, dto.Type)
 }
 
 func validateDuration(dto candleCreateDTO.CandleCreateDTO) error {
 	if dto.DurationHours <= 0 {
-		return errors.New("duration must be greater than zero")
+		return errors.New(validationDurationLessThanZero)
 	}
 	return nil
 }
 
 func validateIntention(dto candleCreateDTO.CandleCreateDTO) error {
 	if len(dto.Intention) < 3 {
-		return errors.New("intention is too short")
+		return errors.New(validationIntentionShort)
 	}
 	return nil
 }
@@ -57,5 +62,5 @@ func validateState(dto candleCreateDTO.CandleCreateDTO) error {
 		enums.RJ, enums.RN, enums.RS, enums.RO, enums.RR, enums.SC, enums.SP, enums.SE, enums.TO:
 		return nil
 	}
-	return fmt.Errorf("invalid brazil state: %s", dto.State)
+	return fmt.Errorf(validationInvalidState, dto.State)
 }
