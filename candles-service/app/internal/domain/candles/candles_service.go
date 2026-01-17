@@ -24,25 +24,25 @@ func NewCandleService(gw CandleGateway) *CandleService {
 }
 
 func (s *CandleService) CreateCandle(ctx context.Context, dto candlesDTO.CandleCreateDTO) (*candlesEntity.Candle, error) {
-    if err := candleValidator.IsValid(dto); err != nil {
-        return nil, err
-    }
+	if err := candleValidator.IsValid(dto); err != nil {
+		return nil, err
+	}
 
-    candle := &candlesEntity.Candle{
-        Type:          dto.Type,
-        Intention:     dto.Intention,
-        City:          dto.City,
-		State: 		   dto.State,
-		Description:   dto.Type.GetDescription(),
-        ExpiresAt:     time.Now().Add(time.Duration(dto.DurationHours) * time.Hour),
-        CreatedAt:     time.Now(),
-    }
+	candle := &candlesEntity.Candle{
+		Type:        dto.Type,
+		Intention:   dto.Intention,
+		City:        dto.City,
+		State:       dto.State,
+		Description: dto.Type.GetDescription(),
+		ExpiresAt:   time.Now().Add(time.Duration(dto.DurationHours) * time.Hour),
+		CreatedAt:   time.Now(),
+	}
 
-    if err := s.gateway.Save(ctx, candle); err != nil {
-        return nil, err
-    }
+	if err := s.gateway.Save(ctx, candle); err != nil {
+		return nil, err
+	}
 
-    return candle, nil
+	return candle, nil
 }
 
 func (s *CandleService) GetCandleByID(ctx context.Context, id string) (*candlesEntity.Candle, error) {
