@@ -40,13 +40,9 @@ spec:
           {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-            - name: CANDLES_MONGO_URI
-              value: {{ .Values.mongodb.uri | quote }}
-            - name: DB_NAME
-              value: "candles_db"
-            - name: PORT
-              value: {{ .Values.service.port | quote }}
+          envFrom:
+            - secretRef:
+                name: candles-mongo-secret
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

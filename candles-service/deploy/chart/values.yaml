@@ -2,17 +2,13 @@ replicaCount: 2
 
 image:
   repository: candles-service
-  pullPolicy: IfNotPresent
+  pullPolicy: Never
   tag: "latest"
 
 service:
-  type: NodePort
+  type: ClusterIP
   port: 8080
 
-mongodb:
-  uri: "mongodb://USUARIO:SENHA@mongo-service:27017/candles_db?authSource=admin"
-
-# Adicione estas linhas para satisfazer os templates padrão:
 autoscaling:
   enabled: false
 
