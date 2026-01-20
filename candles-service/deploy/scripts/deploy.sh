@@ -12,12 +12,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Diretório deploy
 DEPLOY_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+PROJECT_ROOT="$(realpath "$SCRIPT_DIR/../../..")"
 # Diretório do Helm Chart
 CHART_DIR="$DEPLOY_DIR/chart"
 
-# =========================
-# Configurações
-# =========================
+NAMESPACE="candles-service"
 
 CHART_NAME="candles-release"
 IMAGE_NAME="candles-service"
@@ -29,10 +28,17 @@ echo "Deploy do Candles Service"
 echo "============================"
 echo ""
 
+if ! kubectl get namespace "$NAMESPACE" &> /dev/null; then
+    echo "📂 Criando namespace $NAMESPACE..."
+    kubectl create namespace "$NAMESPACE"
+else
+    echo "📂 Namespace $NAMESPACE já existe"
+fi
+
 # =========================
 # 0. Carregar Env
 # =========================
-if [ -f "$DEPLOY_DIR/.env" ]; then
+if [ -f "$PROJECT_ROOT/.env" ]; then
   export $(grep -v '^#' "$DEPLOY_DIR/.env" | xargs)
   echo "✅ Variáveis de ambiente carregadas do .env"
 else
@@ -57,9 +63,11 @@ echo ""
 echo "🔒 1.5 Criando Secret (MongoDB) se não existir..."
 if ! kubectl get secret candles-mongo-secret &> /dev/null; then
     kubectl create secret generic candles-mongo-secret \
-        --from-literal=CANDLES_MONGO_URI="$MONGO_URI" \
-        --from-literal=DB_NAME="$DB_NAME" \
-        --from-literal=CANDLES_PORT="$CANDLES_PORT"
+    --from-literal=CANDLES_MONGO_URI="$MONGO_URI" \
+    --from-literal=DB_NAME="$DB_NAME" \
+    --from-literal=CANDLES_PORT="$CANDLES_PORT" \
+    --namespace "$NAMESPACE" \
+    --dry-run=client -o yaml | kubectl apply -f -
     echo "✅ Secret criado"
 else
     echo "✅ Secret já existe"
@@ -100,13 +108,15 @@ if helm list | grep -q "$CHART_NAME"; then
     echo "🔄 Release existente encontrado. Atualizando..."
     helm upgrade "$CHART_NAME" "$CHART_DIR" \
         --set image.repository="$IMAGE_NAME" \
-        --set image.tag="$IMAGE_TAG"
+        --set image.tag="$IMAGE_TAG" \
+        --namespace "$NAMESPACE"
     echo "✅ Release atualizado"
 else
     echo "📦 Instalando novo release..."
     helm install "$CHART_NAME" "$CHART_DIR" \
         --set image.repository="$IMAGE_NAME" \
-        --set image.tag="$IMAGE_TAG"
+        --set image.tag="$IMAGE_TAG" \
+        --namespace "$NAMESPACE"
     echo "✅ Release instalado"
 fi
 
