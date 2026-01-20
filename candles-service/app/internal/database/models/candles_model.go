@@ -9,14 +9,14 @@ import (
 )
 
 type CandleModel struct {
-	ID          bson.ObjectID    `bson:"_id,omitempty"`
-	Type        enums.CandleType `bson:"type"`
-	City        string           `bson:"city"`
-	State       enums.BrazilState`bson:"state"`
-	Description string           `bson:"Description"`
-	Intention   string           `bson:"Intention"`
-	ExpiresAt   time.Time        `bson:"expires_at"`
-	CreatedAt   time.Time        `bson:"created_at"`
+	ID          bson.ObjectID     `bson:"_id,omitempty"`
+	Type        enums.CandleType  `bson:"type"`
+	City        string            `bson:"city"`
+	State       enums.BrazilState `bson:"state"`
+	Description string            `bson:"Description"`
+	Intention   string            `bson:"Intention"`
+	ExpiresAt   time.Time         `bson:"expires_at"`
+	CreatedAt   time.Time         `bson:"created_at"`
 }
 
 func (m *CandleModel) ToEntity() *entity.Candle {
@@ -24,7 +24,7 @@ func (m *CandleModel) ToEntity() *entity.Candle {
 		ID:          m.ID.Hex(),
 		Type:        m.Type,
 		City:        m.City,
-		State:		 m.State,
+		State:       m.State,
 		Description: m.Description,
 		Intention:   m.Intention,
 		ExpiresAt:   m.ExpiresAt,
@@ -38,7 +38,7 @@ func FromEntity(c *entity.Candle) *CandleModel {
 		ID:          objID,
 		Type:        c.Type,
 		City:        c.City,
-		State:		 c.State,
+		State:       c.State,
 		Description: c.Description,
 		Intention:   c.Intention,
 		ExpiresAt:   c.ExpiresAt,
