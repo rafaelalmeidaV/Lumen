@@ -3,6 +3,7 @@ package candles
 import (
 	candlesService "candles-service/internal/domain/candles"
 	candlesDTO "candles-service/internal/domain/candles/DTO"
+	auth "candles-service/internal/auth"
 	"fmt"
 
 	"net/http"
@@ -16,7 +17,7 @@ func RegisterCandlesRoutes(r *gin.Engine, service *candlesService.CandleService)
 		routes.POST("", func(c *gin.Context) {
 			createCandleHandler(c, service)
 		})
-		routes.GET("/:id", func(c *gin.Context) {
+		routes.GET("/:id", auth.JWTMiddleware(), func(c *gin.Context) {
 			getCandleByIDHandler(c, service)
 		})
 		routes.GET("", func(c *gin.Context) {

@@ -9,6 +9,7 @@ import (
 	"candles-service/internal/domain/candles"
 	candlesRoutes "candles-service/internal/handlers/candles"
 	healthRoutes "candles-service/internal/handlers/health"
+	usersRoutes "candles-service/internal/handlers/users"
 	repository "candles-service/internal/repository/candle"
 
 	"github.com/gin-gonic/gin"
@@ -56,6 +57,7 @@ func setupRoutes(r *gin.Engine, client *mongo.Client) {
 
 	healthRoutes.RegisterLivenessReadinessRoutes(r)
 	candlesRoutes.RegisterCandlesRoutes(r, service)
+	usersRoutes.RegisterUsersRoutes(r)
 }
 
 func setupGlobalMiddlewares(r *gin.Engine) {

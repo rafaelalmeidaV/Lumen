@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login Keycloak PKCE</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+  <div class="bg-white p-8 rounded-xl shadow-lg w-96">
+    <h2 class="text-2xl font-bold mb-6 text-center">Entrar</h2>
+
+    <button
+      onclick="login()"
+      class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+    >
+      Entrar com Keycloak
+    </button>
+
+    <pre id="output" class="text-xs mt-4 whitespace-pre-wrap"></pre>
+  </div>
+
+<script>
+/* ========= CONFIG ========= */
+const KEYCLOAK_BASE = "http://localhost:8080";
+const REALM = "Lumen";
+const CLIENT_ID = "public";
+const REDIRECT_URI = "http://localhost:8081/";
+
+const AUTH_ENDPOINT =
+  `${KEYCLOAK_BASE}/realms/${REALM}/protocol/openid-connect/auth`;
+
+const TOKEN_ENDPOINT =
+  `${KEYCLOAK_BASE}/realms/${REALM}/protocol/openid-connect/token`;
+
+/* ========= PKCE ========= */
+function base64urlencode(buffer) {
+  return btoa(String.fromCharCode(...new Uint8Array(buffer)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
+async function sha256(text) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  return crypto.subtle.digest("SHA-256", data);
+}
+
+/* ========= LOGIN ========= */
+async function login() {
+  console.log(3)
+  const codeVerifier = crypto.randomUUID() + crypto.randomUUID();
+  sessionStorage.setItem("code_verifier", codeVerifier);
+
+  const challengeBuffer = await sha256(codeVerifier);
+  const codeChallenge = base64urlencode(challengeBuffer);
+
+  const params = new URLSearchParams({
+    client_id: CLIENT_ID,
+    response_type: "code",
+    redirect_uri: REDIRECT_URI,
+    scope: "openid profile email",
+    code_challenge: codeChallenge,
+    code_challenge_method: "S256",
+  });
+
+  window.location.href = `${AUTH_ENDPOINT}?${params.toString()}`;
+}
+
+/* ========= CALLBACK ========= */
+async function handleCallback() {
+  const url = new URL(window.location.href);
+  const code = url.searchParams.get("code");
+
+  if (!code) return;
+
+  const codeVerifier = sessionStorage.getItem("code_verifier");
+
+  const body = new URLSearchParams({
+    grant_type: "authorization_code",
+    client_id: CLIENT_ID,
+    code,
+    redirect_uri: REDIRECT_URI,
+    code_verifier: codeVerifier,
+  });
+
+  const res = await fetch(TOKEN_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
+
+  const tokens = await res.json();
+
+  document.getElementById("output").textContent =
+    JSON.stringify(tokens, null, 2);
+
+  // limpa a URL (remove ?code=...)
+  window.history.replaceState({}, document.title, "/");
+}
+
+handleCallback();
+</script>
+</body>
+</html>
