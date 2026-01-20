@@ -1,0 +1,37 @@
+replicaCount: 2
+
+image:
+  repository: candles-service
+  pullPolicy: Never
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+autoscaling:
+  enabled: false
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: candles.local
+      paths:
+        - path: /
+          pathType: Prefix
+
+# Outras chaves que o deployment.yaml original costuma pedir:
+podAnnotations: {}
+podLabels: {}
+podSecurityContext: {}
+securityContext: {}
+resources: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}
+serviceAccount:
+  create: true
+  name: ""
