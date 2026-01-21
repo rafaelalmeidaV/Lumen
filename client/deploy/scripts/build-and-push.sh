@@ -5,7 +5,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_DIR="$(realpath "$SCRIPT_DIR/../../app")"
 
-IMAGE_NAME="client-service"
+IMAGE_NAME="client"
 IMAGE_TAG="latest"
 
 echo "Build and Push to Minikube"

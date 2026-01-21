@@ -14,7 +14,7 @@ build-candles-service:
 build-auth-service:
 	@bash auth-service/deploy/scripts/build-and-push.sh
 
-build-client-service:
+build-client:
 	@bash client/deploy/scripts/build-and-push.sh
 
 deploy-candles-service:
@@ -23,11 +23,11 @@ deploy-candles-service:
 deploy-auth-service:
 	@bash auth-service/deploy/scripts/deploy.sh
 
-deploy-client-service:
+deploy-client:
 	@bash client/deploy/scripts/deploy.sh
 
-build-all: build-candles-service build-auth-service build-client-service
+build-all: build-candles-service build-auth-service build-client
 
-deploy-all: deploy-candles-service deploy-auth-service deploy-client-service
+deploy-all: deploy-candles-service deploy-auth-service deploy-client
 
 all: setup build-all deploy-all

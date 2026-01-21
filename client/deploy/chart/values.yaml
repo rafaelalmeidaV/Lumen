@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: client-service
+  repository: client
   pullPolicy: Never
   tag: "latest"
 

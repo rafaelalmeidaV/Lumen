@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEPLOY_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 CHART_DIR="$DEPLOY_DIR/chart"
 
-APP_NAME="client-service"
+APP_NAME="client"
 NAMESPACE="$APP_NAME"
 CHART_NAME="$APP_NAME"
 IMAGE_NAME="$APP_NAME"
