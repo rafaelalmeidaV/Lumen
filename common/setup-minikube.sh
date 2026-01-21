@@ -2,7 +2,7 @@
 
 set -e
 
-hosts="candles.local auth.local"
+hosts="candles.local auth.local client.local"
 
 getMinikubeIP() {
   if ! minikube status &> /dev/null; then

@@ -4,3 +4,4 @@ helm
 kubectl
 minikube
 *.exe
+realm-export.json
