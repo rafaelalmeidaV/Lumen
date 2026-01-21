@@ -12,7 +12,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Diretório deploy
 DEPLOY_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-PROJECT_ROOT="$(realpath "$SCRIPT_DIR/../../..")"
+PROJECT_ROOT="$(realpath "$SCRIPT_DIR/../../../")"
+
 # Diretório do Helm Chart
 CHART_DIR="$DEPLOY_DIR/chart"
 
@@ -39,15 +40,21 @@ fi
 # 0. Carregar Env
 # =========================
 if [ -f "$PROJECT_ROOT/.env" ]; then
-  export $(grep -v '^#' "$DEPLOY_DIR/.env" | xargs)
+  set -a
+  source "$PROJECT_ROOT/.env"
+  set +a
   echo "✅ Variáveis de ambiente carregadas do .env"
+  
+  if [ -z "$CANDLES_MONGO_URI" ]; then
+    echo "❌ CANDLES_MONGO_URI está vazio após carregar .env!"
+    echo "Arquivo .env: $PROJECT_ROOT/.env"
+    exit 1
+  fi
 else
-  echo "⚠️  .env não encontrado, usando valores padrão"
+  echo "⚠️  .env não encontrado em $PROJECT_ROOT/.env"
+  exit 1
 fi
 
-# =========================
-# 1. Verificar Minikube
-# =========================
 echo "📦 1. Verificando Minikube..."
 if ! minikube status &> /dev/null; then
     echo "❌ Minikube não está rodando!"
@@ -56,14 +63,11 @@ if ! minikube status &> /dev/null; then
 fi
 echo "✅ Minikube rodando"
 
-# =========================
-# 1.5. Criar Secret
-# =========================
 echo ""
 echo "🔒 1.5 Criando Secret (MongoDB) se não existir..."
 if ! kubectl get secret candles-mongo-secret &> /dev/null; then
     kubectl create secret generic candles-mongo-secret \
-    --from-literal=CANDLES_MONGO_URI="$MONGO_URI" \
+    --from-literal=CANDLES_MONGO_URI="$CANDLES_MONGO_URI" \
     --from-literal=DB_NAME="$DB_NAME" \
     --from-literal=CANDLES_PORT="$CANDLES_PORT" \
     --namespace "$NAMESPACE" \
@@ -141,15 +145,15 @@ echo "🔍 6. Status do deployment:"
 echo ""
 
 echo "Pods:"
-kubectl get pods -l app.kubernetes.io/name=candles-chart
+kubectl get pods -n candles-service -l app.kubernetes.io/name=candles-chart
 echo ""
 
 echo "Services:"
-kubectl get svc -l app.kubernetes.io/name=candles-chart
+kubectl get svc -n candles-service -l app.kubernetes.io/name=candles-chart
 echo ""
 
 echo "Ingress:"
-kubectl get ingress
+kubectl get ingress -n candles-service
 echo ""
 
 # =========================
@@ -188,5 +192,5 @@ echo "🔄 Para atualizar após mudanças:"
 echo "  ./build-and-push.sh && ./deploy.sh"
 echo ""
 echo "🗑️  Para remover:"
-echo "  helm uninstall $CHART_NAME"
+echo "  helm uninstall -n candles-service $CHART_NAME"
 echo ""

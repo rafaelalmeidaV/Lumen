@@ -7,7 +7,7 @@ image:
 
 service:
   type: ClusterIP
-  port: 8080
+  port: 8089
 
 autoscaling:
   enabled: false
@@ -23,7 +23,6 @@ ingress:
         - path: /
           pathType: Prefix
 
-# Outras chaves que o deployment.yaml original costuma pedir:
 podAnnotations: {}
 podLabels: {}
 podSecurityContext: {}
