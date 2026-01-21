@@ -1,78 +1,97 @@
-# Projeto Lumen
+# Lumen Project
 
-Este projeto consiste em um backend desenvolvido em Go, focado na criação de um sistema de velas virtuais e intenções. A aplicação permite que usuários escolham tipos de velas, definam tempos de duração e registrem suas justificativas ou intenções.
+The Lumen Project is a virtual candle and intention platform built with a modern microservices architecture. It allows users to register intentions, prayers, and messages through symbolic candles with controlled expiration times.
 
-## Objetivos do Projeto
+## System Architecture
 
-* **Seleção de Velas**: Interface para escolha de diferentes tipos de velas simbólicas.
-* **Gestão de Intenções**: Registro de mensagens, orações ou justificativas associadas a cada vela.
-* **Temporização**: Controle do período em que cada vela permanece ativa no sistema.
-* **Arquitetura Modular**: Organização do código por domínios, garantindo escalabilidade e facilidade de manutenção.
+The system is composed of independent services orchestrated via Kubernetes:
 
-## Tecnologias Utilizadas
+* **Candles Service**: A Go (Gin Gonic) backend responsible for business logic, candle management, and MongoDB persistence.
+* **Auth Service**: Identity and Access Management (IAM) powered by **Keycloak**, implementing the **PKCE** flow for secure frontend authentication.
+* **Database**: A MongoDB instance for storing intentions and candle states.
 
-* **Linguagem**: Go (Golang)
-* **Framework**: Gin Gonic
-* **Banco de Dados**: MongoDB
-* **Orquestração**: Kubernetes (Minikube)
-* **Gerenciamento de Pacotes**: Helm
+## Technologies
 
-## Pré-requisitos
+* **Languages**: Go (Golang)
+* **Security**: Keycloak (OIDC/PKCE)
+* **Database**: MongoDB
+* **Infrastructure**: Docker, Kubernetes (Minikube), Helm
+* **Automation**: GNU Make
+
+## Prerequisites
+
+Ensure you have the following installed:
 
 * [Docker](https://docs.docker.com/get-docker/)
 * [Minikube](https://minikube.sigs.k8s.io/docs/start/)
 * [kubectl](https://kubernetes.io/docs/tasks/tools/)
 * [Helm](https://helm.sh/docs/intro/install/)
 
-## Configuração
+## Installation and Setup
 
-Crie um arquivo `.env` no diretório `deploy/`:
+This project uses a `Makefile` to centralize operations. Follow the order below for the initial setup:
 
-```bash
-MONGO_URI=mongodb://usuario:senha@mongo-service:27017/candles_db?authSource=admin
-DB_NAME=candles_db
-CANDLES_PORT=8080
-```
+### 1. Initial Permissions
 
-## Como Rodar
-
-### 1. Setup do Minikube
+Prepare the repository scripts by granting execution permissions:
 
 ```bash
-cd deploy/scripts
-chmod +x setup-minikube.sh
-./setup-minikube.sh
+make onboard
+
 ```
 
-### 2. Build da Imagem
+### 2. Environment Setup
+
+Initialize Minikube, enable the Ingress Controller, and configure local domains in your `/etc/hosts`:
 
 ```bash
-chmod +x build-and-push.sh
-./build-and-push.sh
+make setup
+
 ```
 
-### 3. Deploy da Aplicação
+### 3. Build and Full Deployment
+
+Compile Docker images within the Minikube environment and deploy via Helm Charts:
 
 ```bash
-chmod +x deploy.sh
-./deploy.sh
-```
-
-## Acessar
+make all
 
 ```
-http://candles.local
-```
 
-## Atualizar
+## Accessing the Services
+
+Once the deployment is complete, the services will be available at:
+
+* **Main Application**: [http://candles.local](https://www.google.com/search?q=http://candles.local)
+* **Identity Provider**: [http://auth.local](https://www.google.com/search?q=http://auth.local)
+
+## Development Workflow
+
+To update a specific service after code changes:
+
+**Candles Service:**
 
 ```bash
-./build-and-push.sh && ./deploy.sh
+make build-candles-service
+make deploy-candles-service
+
 ```
 
-## Remover
+**Auth Service:**
 
 ```bash
-helm uninstall candles-release
-./setup-minikube.sh remove
+make build-auth-service
+make deploy-auth-service
+
 ```
+
+## Cleanup
+
+To remove all deployments and clean local host entries:
+
+```bash
+make clean
+
+```
+
+---
