@@ -2,79 +2,74 @@
 
 set -e
 
-# Configurações
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_DIR="$(realpath "$SCRIPT_DIR/../../app")"
+
 IMAGE_NAME="candles-service"
 IMAGE_TAG="latest"
 
-echo "🏗️  Build and Push para Minikube"
+echo "Build and Push to Minikube"
 echo "================================="
 echo ""
 
-# 1. Verificar se Minikube está rodando
-echo "📦 1. Verificando Minikube..."
+echo "Checking Minikube..."
 if ! minikube status &> /dev/null; then
-    echo "❌ Minikube não está rodando!"
-    echo "💡 Execute: ./setup-minikube.sh"
+    echo "ERROR: Minikube is not running"
+    echo "Run: ./setup-minikube.sh"
     exit 1
 fi
-echo "✅ Minikube rodando"
+echo "Minikube is running"
 
-# 2. Verificar se Dockerfile existe
 echo ""
-echo "📄 2. Verificando Dockerfile..."
-if [ ! -f "../../app/Dockerfile" ]; then
-    echo "❌ Dockerfile não encontrado!"
-    echo "💡 Certifique-se de estar no diretório correto"
+echo "Checking Dockerfile..."
+if [ ! -f "$APP_DIR/Dockerfile" ]; then
+    echo "ERROR: Dockerfile not found at $APP_DIR/Dockerfile"
     exit 1
 fi
-echo "✅ Dockerfile encontrado"
+echo "Dockerfile found"
 
-# 3. Configurar Docker para usar o Minikube
 echo ""
-echo "🐳 3. Configurando Docker para Minikube..."
+echo "Configuring Docker to use Minikube..."
 eval $(minikube docker-env)
-echo "✅ Docker configurado para usar o ambiente do Minikube"
+echo "Docker configured"
 
-# 4. Build da imagem
 echo ""
-echo "🔨 4. Building imagem Docker..."
-echo "Imagem: ${IMAGE_NAME}:${IMAGE_TAG}"
+echo "Building Docker image..."
+echo "Image: ${IMAGE_NAME}:${IMAGE_TAG}"
 echo ""
 
 docker build \
   -t ${IMAGE_NAME}:${IMAGE_TAG} \
-  -f ../../app/Dockerfile \
-  ../../app
+  -f "$APP_DIR/Dockerfile" \
+  "$APP_DIR"
 
 if [ $? -eq 0 ]; then
     echo ""
-    echo "✅ Build concluído com sucesso!"
+    echo "Build completed successfully"
 else
     echo ""
-    echo "❌ Erro no build da imagem"
+    echo "ERROR: Build failed"
     exit 1
 fi
 
-# 5. Verificar imagem
 echo ""
-echo "🔍 5. Verificando imagem..."
+echo "Verifying image..."
 if docker images | grep -q "${IMAGE_NAME}.*${IMAGE_TAG}"; then
-    echo "✅ Imagem disponível no Minikube:"
+    echo "Image available in Minikube:"
     docker images | grep ${IMAGE_NAME}
 else
-    echo "❌ Imagem não encontrada!"
+    echo "ERROR: Image not found"
     exit 1
 fi
 
-# Resumo
 echo ""
 echo "================================="
-echo "✅ Build and Push concluído!"
+echo "Build and Push complete"
 echo "================================="
 echo ""
-echo "📦 Imagem: ${IMAGE_NAME}:${IMAGE_TAG}"
-echo "🐳 Disponível no Docker do Minikube"
+echo "Image: ${IMAGE_NAME}:${IMAGE_TAG}"
+echo "Available in Minikube Docker"
 echo ""
-echo "🔍 Próximo passo:"
-echo "  ./deploy.sh    # Fazer deploy da aplicação"
+echo "Next step:"
+echo "  ./deploy.sh"
 echo ""

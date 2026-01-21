@@ -6,14 +6,14 @@ hosts="candles.local"
 
 getMinikubeIP() {
   if ! minikube status &> /dev/null; then
-    echo "❌ Minikube não está rodando. Inicie com: minikube start" >&2
+    echo "ERROR: Minikube is not running. Start with: minikube start" >&2
     exit 1
   fi
 
   local ip=$(minikube ip)
   
   if [ -z "$ip" ]; then
-    echo "❌ Não foi possível obter o IP do Minikube" >&2
+    echo "ERROR: Could not get Minikube IP" >&2
     exit 1
   fi
 
@@ -43,8 +43,8 @@ addHosts() {
   local minikube_ip=${1}
   local hosts=${2}
 
-  echo "📍 IP do Minikube: $minikube_ip"
-  echo "✏️  Adicionando hosts ao /etc/hosts..."
+  echo "Minikube IP: $minikube_ip"
+  echo "Adding hosts to /etc/hosts..."
 
   sudo bash -c "cat >> /etc/hosts << EOF
 # minikube-candles
@@ -52,72 +52,68 @@ EOF"
 
   for host in $hosts; do
     sudo echo "${minikube_ip} ${host}" >> /etc/hosts
-    echo "  ✅ ${minikube_ip} ${host}"
+    echo "  Added: ${minikube_ip} ${host}"
   done
 
   sudo echo "# minikube-candles-end" >> /etc/hosts
   
   echo ""
-  echo "🌐 Hosts configurados! Você pode acessar:"
+  echo "Hosts configured. You can access:"
   for host in $hosts; do
     echo "  http://${host}"
   done
 }
 
 removeHosts() {
-  echo "🧹 Removendo hosts do Minikube do /etc/hosts..."
+  echo "Removing Minikube hosts from /etc/hosts..."
   sudo sed -i.bak "/# minikube-candles/,/# minikube-candles-end/d" /etc/hosts
-  echo "✅ Hosts removidos!"
+  echo "Hosts removed"
 }
 
 updateHosts() {
   local minikube_ip=${1}
   local hosts=${2}
 
-  echo "🔄 Atualizando hosts do Minikube..."
+  echo "Updating Minikube hosts..."
   removeHosts
   addHosts "${minikube_ip}" "${hosts}"
 }
 
 setupMinikube() {
-  echo "🚀 Setup do Minikube para Candles Service"
+  echo "Minikube Setup for Candles Service"
   echo "=========================================="
   echo ""
 
-  # Verificar se Minikube está instalado
   if ! command -v minikube &> /dev/null; then
-    echo "❌ Minikube não está instalado!"
-    echo "💡 Instale em: https://minikube.sigs.k8s.io/docs/start/"
+    echo "ERROR: Minikube is not installed"
+    echo "Install at: https://minikube.sigs.k8s.io/docs/start/"
     exit 1
   fi
 
-  # Iniciar Minikube se não estiver rodando
-  echo "📦 1. Verificando status do Minikube..."
+  echo "Checking Minikube status..."
   if ! minikube status &> /dev/null; then
-    echo "🔄 Iniciando Minikube..."
+    echo "Starting Minikube..."
     minikube start --driver=docker
-    echo "✅ Minikube iniciado"
+    echo "Minikube started"
   else
-    echo "✅ Minikube já está rodando"
+    echo "Minikube is already running"
   fi
 
-  # Habilitar Ingress
   echo ""
-  echo "🌐 2. Habilitando Ingress Controller..."
+  echo "Enabling Ingress Controller..."
   minikube addons enable ingress
 
-  echo "⏳ Aguardando Ingress Controller ficar pronto..."
+  echo "Waiting for Ingress Controller to be ready..."
   kubectl wait --namespace ingress-nginx \
     --for=condition=ready pod \
     --selector=app.kubernetes.io/component=controller \
-    --timeout=120s 2>/dev/null || echo "⚠️  Continuando..."
+    --timeout=120s 2>/dev/null || echo "WARNING: Continuing..."
 
-  echo "✅ Ingress Controller habilitado"
+  echo "Ingress Controller enabled"
 
-  # Configurar /etc/hosts
   echo ""
-  echo "🔧 3. Configurando /etc/hosts..."
-  echo "Esta operação requer 'sudo'. Digite sua senha se solicitado."
+  echo "Configuring /etc/hosts..."
+  echo "This operation requires 'sudo'. Enter your password if prompted."
   echo ""
 
   minikube_ip=$(getMinikubeIP)
@@ -126,41 +122,40 @@ setupMinikube() {
     removeHosts
     addHosts "${minikube_ip}" "${hosts}"
   else
-    echo "✅ Hosts já estão configurados corretamente!"
+    echo "Hosts are already configured correctly"
     for host in $hosts; do
       echo "  ${minikube_ip} ${host}"
     done
   fi
 
-  # Resumo
   echo ""
   echo "=========================================="
-  echo "✅ Setup do Minikube concluído!"
+  echo "Minikube setup complete"
   echo "=========================================="
   echo ""
-  echo "📍 IP do Minikube: $minikube_ip"
-  echo "🌐 Hosts configurados:"
+  echo "Minikube IP: $minikube_ip"
+  echo "Configured hosts:"
   for host in $hosts; do
     echo "  - http://${host}"
   done
   echo ""
-  echo "🔍 Próximos passos:"
-  echo "  1. ./build-and-push.sh    # Buildar e enviar a imagem"
-  echo "  2. ./deploy.sh            # Fazer deploy da aplicação"
+  echo "Next steps:"
+  echo "  1. ./build-and-push.sh"
+  echo "  2. ./deploy.sh"
   echo ""
 }
 
 showHelp() {
-  echo "Uso: $0 [comando]"
+  echo "Usage: $0 [command]"
   echo ""
-  echo "Comandos:"
-  echo "  setup   - Setup completo do Minikube (padrão)"
-  echo "  add     - Adiciona os hosts ao /etc/hosts"
-  echo "  remove  - Remove os hosts do /etc/hosts"
-  echo "  update  - Atualiza os hosts com o IP atual"
-  echo "  check   - Verifica se os hosts estão configurados"
+  echo "Commands:"
+  echo "  setup   - Complete Minikube setup (default)"
+  echo "  add     - Add hosts to /etc/hosts"
+  echo "  remove  - Remove hosts from /etc/hosts"
+  echo "  update  - Update hosts with current IP"
+  echo "  check   - Check if hosts are configured"
   echo ""
-  echo "Hosts gerenciados:"
+  echo "Managed hosts:"
   for host in $hosts; do
     echo "  - ${host}"
   done
@@ -177,12 +172,12 @@ case "$command" in
     minikube_ip=$(getMinikubeIP)
     
     if [ "$(doHostsExist "${minikube_ip}" "${hosts}")" == "false" ]; then
-      echo "Esta operação requer 'sudo'. Digite sua senha se solicitado."
+      echo "This operation requires 'sudo'. Enter your password if prompted."
       echo ""
       removeHosts
       addHosts "${minikube_ip}" "${hosts}"
     else
-      echo "✅ Os hosts já estão configurados corretamente!"
+      echo "Hosts are already configured correctly"
       for host in $hosts; do
         echo "  ${minikube_ip} ${host}"
       done
@@ -190,14 +185,14 @@ case "$command" in
     ;;
     
   remove)
-    echo "Esta operação requer 'sudo'. Digite sua senha se solicitado."
+    echo "This operation requires 'sudo'. Enter your password if prompted."
     echo ""
     removeHosts
     ;;
     
   update)
     minikube_ip=$(getMinikubeIP)
-    echo "Esta operação requer 'sudo'. Digite sua senha se solicitado."
+    echo "This operation requires 'sudo'. Enter your password if prompted."
     echo ""
     updateHosts "${minikube_ip}" "${hosts}"
     ;;
@@ -206,17 +201,17 @@ case "$command" in
     minikube_ip=$(getMinikubeIP)
     
     if [ "$(doHostsExist "${minikube_ip}" "${hosts}")" == "true" ]; then
-      echo "✅ Todos os hosts estão configurados corretamente!"
+      echo "All hosts are configured correctly"
       echo ""
       for host in $hosts; do
         echo "  ${minikube_ip} ${host}"
       done
     else
-      echo "❌ Os hosts NÃO estão configurados ou estão com IP diferente."
+      echo "ERROR: Hosts are NOT configured or have different IP"
       echo ""
-      echo "IP atual do Minikube: ${minikube_ip}"
+      echo "Current Minikube IP: ${minikube_ip}"
       echo ""
-      echo "Execute '$0 add' ou '$0 update' para configurar."
+      echo "Run '$0 add' or '$0 update' to configure"
     fi
     ;;
     
