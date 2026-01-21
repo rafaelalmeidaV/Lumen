@@ -15,6 +15,11 @@ help:
 	@echo "  make clean                    - Clean all services"
 	@echo ""
 
+onboard:
+	@echo "Setting execution permissions for all shell scripts..."
+	@find . -name "*.sh" -type f -exec chmod +x {} \;
+	@echo "Permissions set for all .sh files in the repository."
+
 setup:
 	@bash common/setup-minikube.sh
 
