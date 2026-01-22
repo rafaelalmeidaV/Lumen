@@ -11,7 +11,7 @@ NAMESPACE="$APP_NAME"
 CHART_NAME="$APP_NAME"
 IMAGE_NAME="$APP_NAME"
 IMAGE_TAG="latest"
-HOST="client.local"
+HOST="lumen.client.local"
 
 createNamespaceIfNotExists() {
     if ! kubectl get namespace "$NAMESPACE" &> /dev/null; then

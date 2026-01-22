@@ -1,0 +1,44 @@
+project:
+  name: lumen
+  domain: lumen.local
+
+services:
+  candles:
+    enabled: true
+    subdomain: candles
+    port: 8089
+    namespace: candles-service
+    replicas: 2
+    
+  auth:
+    enabled: true
+    subdomain: auth
+    port: 8080
+    namespace: auth-service
+    replicas: 1
+    
+  client:
+    enabled: true
+    subdomain: client
+    port: 80
+    namespace: client-service
+    replicas: 1
+
+urls:
+  external:
+    candles: http://lumen.candles.local
+    auth: http://lumen.auth.local
+    client: http://lumen.client.local
+  internal:
+    candles: http://candles-service-candles-chart.candles-service:8089
+    auth: http://auth-service-auth-chart.auth-service:8080
+    client: http://client-client-chart.client-service:80
+
+minikube:
+  driver: docker
+  addons:
+    - ingress
+  hosts:
+    - lumen.candles.local
+    - lumen.auth.local
+    - lumen.client.local

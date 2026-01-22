@@ -15,7 +15,7 @@ ingress:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
   hosts:
-    - host: client.local
+    - host: lumen.client.local
       paths:
         - path: /
           pathType: Prefix

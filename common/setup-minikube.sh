@@ -2,7 +2,17 @@
 
 set -e
 
-hosts="candles.local auth.local client.local"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="$SCRIPT_DIR/local/lumen.yaml"
+
+loadHostsFromConfig() {
+  if [ -f "$CONFIG_FILE" ]; then
+    hosts=$(grep -A 100 "minikube:" "$CONFIG_FILE" | grep -A 100 "hosts:" | grep "^    -" | sed 's/^    - //' | tr '\n' ' ')
+  else
+    echo "ERROR: lumen.yaml not found at $CONFIG_FILE"
+    exit 1
+  fi
+}
 
 getMinikubeIP() {
   if ! minikube status &> /dev/null; then
@@ -47,7 +57,7 @@ addHosts() {
   echo "Adding hosts to /etc/hosts..."
 
   sudo bash -c "cat >> /etc/hosts << EOF
-# minikube-candles
+# minikube-lumen
 EOF"
 
   for host in $hosts; do
@@ -55,7 +65,7 @@ EOF"
     echo "  Added: ${minikube_ip} ${host}"
   done
 
-  sudo tee -a /etc/hosts > /dev/null
+  echo "# minikube-lumen-end" | sudo tee -a /etc/hosts > /dev/null
   
   echo ""
   echo "Hosts configured. You can access:"
@@ -66,7 +76,7 @@ EOF"
 
 removeHosts() {
   echo "Removing Minikube hosts from /etc/hosts..."
-  sudo sed -i.bak "/# minikube-candles/,/# minikube-candles-end/d" /etc/hosts
+  sudo sed -i.bak "/# minikube-lumen/,/# minikube-lumen-end/d" /etc/hosts
   echo "Hosts removed"
 }
 
@@ -79,17 +89,15 @@ updateHosts() {
   addHosts "${minikube_ip}" "${hosts}"
 }
 
-setupMinikube() {
-  echo "Minikube Setup for Candles Service"
-  echo "=========================================="
-  echo ""
-
+checkMinikubeInstalled() {
   if ! command -v minikube &> /dev/null; then
     echo "ERROR: Minikube is not installed"
     echo "Install at: https://minikube.sigs.k8s.io/docs/start/"
     exit 1
   fi
+}
 
+startMinikube() {
   echo "Checking Minikube status..."
   if ! minikube status &> /dev/null; then
     echo "Starting Minikube..."
@@ -98,7 +106,9 @@ setupMinikube() {
   else
     echo "Minikube is already running"
   fi
+}
 
+enableIngressController() {
   echo ""
   echo "Enabling Ingress Controller..."
   minikube addons enable ingress
@@ -110,7 +120,9 @@ setupMinikube() {
     --timeout=120s 2>/dev/null || echo "WARNING: Continuing..."
 
   echo "Ingress Controller enabled"
+}
 
+configureHosts() {
   echo ""
   echo "Configuring /etc/hosts..."
   echo "This operation requires 'sudo'. Enter your password if prompted."
@@ -127,7 +139,11 @@ setupMinikube() {
       echo "  ${minikube_ip} ${host}"
     done
   fi
+}
 
+showSummary() {
+  local minikube_ip=${1}
+  
   echo ""
   echo "=========================================="
   echo "Minikube setup complete"
@@ -140,12 +156,79 @@ setupMinikube() {
   done
   echo ""
   echo "Next steps:"
-  echo "  1. ./build-and-push.sh"
-  echo "  2. ./deploy.sh"
+  echo "  make build-all"
+  echo "  make deploy-all"
   echo ""
 }
 
+setupMinikube() {
+  echo "Minikube Setup for Lumen"
+  echo "=========================================="
+  echo ""
+
+  loadHostsFromConfig
+  checkMinikubeInstalled
+  startMinikube
+  enableIngressController
+  configureHosts
+  
+  minikube_ip=$(getMinikubeIP)
+  showSummary "$minikube_ip"
+}
+
+commandAdd() {
+  loadHostsFromConfig
+  minikube_ip=$(getMinikubeIP)
+  
+  if [ "$(doHostsExist "${minikube_ip}" "${hosts}")" == "false" ]; then
+    echo "This operation requires 'sudo'. Enter your password if prompted."
+    echo ""
+    removeHosts
+    addHosts "${minikube_ip}" "${hosts}"
+  else
+    echo "Hosts are already configured correctly"
+    for host in $hosts; do
+      echo "  ${minikube_ip} ${host}"
+    done
+  fi
+}
+
+commandRemove() {
+  echo "This operation requires 'sudo'. Enter your password if prompted."
+  echo ""
+  removeHosts
+}
+
+commandUpdate() {
+  loadHostsFromConfig
+  minikube_ip=$(getMinikubeIP)
+  echo "This operation requires 'sudo'. Enter your password if prompted."
+  echo ""
+  updateHosts "${minikube_ip}" "${hosts}"
+}
+
+commandCheck() {
+  loadHostsFromConfig
+  minikube_ip=$(getMinikubeIP)
+  
+  if [ "$(doHostsExist "${minikube_ip}" "${hosts}")" == "true" ]; then
+    echo "All hosts are configured correctly"
+    echo ""
+    for host in $hosts; do
+      echo "  ${minikube_ip} ${host}"
+    done
+  else
+    echo "ERROR: Hosts are NOT configured or have different IP"
+    echo ""
+    echo "Current Minikube IP: ${minikube_ip}"
+    echo ""
+    echo "Run '$0 add' or '$0 update' to configure"
+  fi
+}
+
 showHelp() {
+  loadHostsFromConfig
+  
   echo "Usage: $0 [command]"
   echo ""
   echo "Commands:"
@@ -161,62 +244,30 @@ showHelp() {
   done
 }
 
-command=${1:-setup}
+main() {
+  local command=${1:-setup}
 
-case "$command" in
-  setup)
-    setupMinikube
-    ;;
-    
-  add)
-    minikube_ip=$(getMinikubeIP)
-    
-    if [ "$(doHostsExist "${minikube_ip}" "${hosts}")" == "false" ]; then
-      echo "This operation requires 'sudo'. Enter your password if prompted."
-      echo ""
-      removeHosts
-      addHosts "${minikube_ip}" "${hosts}"
-    else
-      echo "Hosts are already configured correctly"
-      for host in $hosts; do
-        echo "  ${minikube_ip} ${host}"
-      done
-    fi
-    ;;
-    
-  remove)
-    echo "This operation requires 'sudo'. Enter your password if prompted."
-    echo ""
-    removeHosts
-    ;;
-    
-  update)
-    minikube_ip=$(getMinikubeIP)
-    echo "This operation requires 'sudo'. Enter your password if prompted."
-    echo ""
-    updateHosts "${minikube_ip}" "${hosts}"
-    ;;
-    
-  check)
-    minikube_ip=$(getMinikubeIP)
-    
-    if [ "$(doHostsExist "${minikube_ip}" "${hosts}")" == "true" ]; then
-      echo "All hosts are configured correctly"
-      echo ""
-      for host in $hosts; do
-        echo "  ${minikube_ip} ${host}"
-      done
-    else
-      echo "ERROR: Hosts are NOT configured or have different IP"
-      echo ""
-      echo "Current Minikube IP: ${minikube_ip}"
-      echo ""
-      echo "Run '$0 add' or '$0 update' to configure"
-    fi
-    ;;
-    
-  *)
-    showHelp
-    exit 1
-    ;;
-esac
+  case "$command" in
+    setup)
+      setupMinikube
+      ;;
+    add)
+      commandAdd
+      ;;
+    remove)
+      commandRemove
+      ;;
+    update)
+      commandUpdate
+      ;;
+    check)
+      commandCheck
+      ;;
+    *)
+      showHelp
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"
