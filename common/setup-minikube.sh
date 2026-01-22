@@ -51,11 +51,11 @@ addHosts() {
 EOF"
 
   for host in $hosts; do
-    sudo echo "${minikube_ip} ${host}" >> /etc/hosts
+    echo "${minikube_ip} ${host}" | sudo tee -a /etc/hosts > /dev/null
     echo "  Added: ${minikube_ip} ${host}"
   done
 
-  sudo echo "# minikube-candles-end" >> /etc/hosts
+  sudo tee -a /etc/hosts > /dev/null
   
   echo ""
   echo "Hosts configured. You can access:"
