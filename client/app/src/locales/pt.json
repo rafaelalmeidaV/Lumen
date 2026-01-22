@@ -1,0 +1,15 @@
+{
+  "auth": {
+    "login": {
+      "title": "Lumen",
+      "subtitle": "Acesse sua conta para continuar",
+      "button": "Entrar",
+      "footer": "Conexão Segura"
+    },
+    "status": {
+      "loading": "Entrando...",
+      "success": "Conectado com sucesso",
+      "connectedMessage": "Você está conectado à plataforma"
+    }
+  }
+}
