@@ -5,11 +5,11 @@ import (
 	"log"
 	"os"
 
-	"candles-service/internal/database"
-	"candles-service/internal/domain/candles"
-	candlesRoutes "candles-service/internal/handlers/candles"
-	healthRoutes "candles-service/internal/handlers/health"
-	repository "candles-service/internal/repository/candle"
+	usecases "candles-service/internal/src/application/use-cases"
+	"candles-service/internal/src/infra/database"
+
+	candleRepository "candles-service/internal/src/infra/database"
+	candlesRoutes "candles-service/internal/src/presentation/controllers/candles_controller"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -51,11 +51,13 @@ func setupDatabase() *mongo.Client {
 func setupRoutes(r *gin.Engine, client *mongo.Client) {
 	dbName := os.Getenv("DB_NAME")
 
-	repo := repository.NewMongoCandleRepository(client, dbName)
-	service := candles.NewCandleService(repo)
+	repo := candleRepository.NewMongoCandleRepository(client, dbName)
 
-	healthRoutes.RegisterLivenessReadinessRoutes(r)
-	candlesRoutes.RegisterCandlesRoutes(r, service)
+	createUC := usecases.NewCreateCandleUseCase(repo)
+	getByIDUC := usecases.NewGetCandleByIDUseCase(repo)
+	getAllUC := usecases.NewGetCandlesUseCase(repo)
+
+	candlesRoutes.RegisterCandlesRoutes(r, createUC, getByIDUC, getAllUC)
 }
 
 func setupGlobalMiddlewares(r *gin.Engine) {
