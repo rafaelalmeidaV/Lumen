@@ -7,7 +7,6 @@ import (
 	candlesDTO "candles-service/internal/src/domain/candles/DTO"
 	"candles-service/internal/src/domain/candles/entity"
 
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -73,7 +72,7 @@ func (h *CandleHandlers) getByID(c *gin.Context) {
 func (h *CandleHandlers) list(c *gin.Context) {
 	candles, err := h.getAllUC.Execute(c.Request.Context())
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

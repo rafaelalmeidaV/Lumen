@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"candles-service/internal/src/domain/candles/entity"
+	"candles-service/internal/src/domain/candles/enums"
 	"candles-service/internal/src/domain/candles/repository"
 	"candles-service/internal/src/infra/database/models"
 
@@ -43,13 +44,27 @@ func (r *MongoCandleRepository) FindByID(
 		return nil, errors.New("invalid id")
 	}
 
-	var model models.CandleModel
-	err = r.collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&model)
+	var result bson.M
+	err = r.collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&result)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("candle not found")
 		}
 		return nil, err
+	}
+
+	model := &models.CandleModel{
+		ID:            objectID.Hex(),
+		City:          result["city"].(string),
+		DurationHours: int(result["duration_hours"].(int32)),
+		Intention:     result["intention"].(string),
+	}
+
+	if state, ok := result["state"].(string); ok {
+		model.State = enums.BrazilState(state)
+	}
+	if candleType, ok := result["type"].(string); ok {
+		model.Type = enums.CandleType(candleType)
 	}
 
 	return model.ToEntity(), nil
@@ -64,15 +79,29 @@ func (r *MongoCandleRepository) FindAll(
 	}
 	defer cursor.Close(ctx)
 
-	var list []models.CandleModel
-	if err := cursor.All(ctx, &list); err != nil {
+	var results []bson.M
+	if err := cursor.All(ctx, &results); err != nil {
 		return nil, err
 	}
 
-	result := make([]*entity.Candle, len(list))
-	for i, m := range list {
-		result[i] = m.ToEntity()
+	candles := make([]*entity.Candle, len(results))
+	for i, doc := range results {
+		model := &models.CandleModel{
+			ID:            doc["_id"].(bson.ObjectID).Hex(),
+			City:          doc["city"].(string),
+			DurationHours: int(doc["duration_hours"].(int32)),
+			Intention:     doc["intention"].(string),
+		}
+
+		if state, ok := doc["state"].(string); ok {
+			model.State = enums.BrazilState(state)
+		}
+		if candleType, ok := doc["type"].(string); ok {
+			model.Type = enums.CandleType(candleType)
+		}
+
+		candles[i] = model.ToEntity()
 	}
 
-	return result, nil
+	return candles, nil
 }
