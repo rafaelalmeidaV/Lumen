@@ -10,7 +10,7 @@ import (
 func ParseAndValidate(tokenString string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenString, getKey)
 	if err != nil || !token.Valid {
-		return nil, errors.New("invaid token")
+		return nil, errors.New(err.Error())
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)

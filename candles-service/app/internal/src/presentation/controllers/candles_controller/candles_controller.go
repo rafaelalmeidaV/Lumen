@@ -2,9 +2,11 @@ package candles
 
 import (
 	"net/http"
+	"time"
 
 	usecases "candles-service/internal/src/application/use-cases"
 	candlesDTO "candles-service/internal/src/domain/candles/DTO"
+	auth "candles-service/internal/src/presentation/auth"
 	"candles-service/internal/src/domain/candles/entity"
 
 	"github.com/gin-gonic/gin"
@@ -27,8 +29,7 @@ func RegisterCandlesRoutes(
 	group := r.Group("/candles")
 	{
 		group.POST("", h.create)
-		group.GET("/:id", h.getByID)
-		// group.GET("/:id", auth.JWTMiddleware(), h.getByID)
+		group.GET("/:id", auth.JWTMiddleware(), h.getByID)
 		group.GET("", h.list)
 	}
 }
@@ -41,10 +42,12 @@ func (h *CandleHandlers) create(c *gin.Context) {
 		return
 	}
 
+
 	candle := &entity.Candle{
 		City:          input.City,
 		State:         input.State,
-		DurationHours: input.DurationHours,
+		CreatedAt:     time.Now(),
+		ExpiredAt:     time.Now().Add(time.Duration(input.DurationHours) * time.Hour),
 		Intention:     input.Intention,
 		Type:          input.Type,
 	}

@@ -56,7 +56,8 @@ func (r *MongoCandleRepository) FindByID(
 	model := &models.CandleModel{
 		ID:            objectID.Hex(),
 		City:          result["city"].(string),
-		DurationHours: int(result["duration_hours"].(int32)),
+		CreatedAt:     result["created_at"].(bson.DateTime).Time(),
+		ExpiredAt:     result["expired_at"].(bson.DateTime).Time(),
 		Intention:     result["intention"].(string),
 	}
 
@@ -89,7 +90,8 @@ func (r *MongoCandleRepository) FindAll(
 		model := &models.CandleModel{
 			ID:            doc["_id"].(bson.ObjectID).Hex(),
 			City:          doc["city"].(string),
-			DurationHours: int(doc["duration_hours"].(int32)),
+			CreatedAt:     doc["created_at"].(bson.DateTime).Time(),
+			ExpiredAt:     doc["expired_at"].(bson.DateTime).Time(),
 			Intention:     doc["intention"].(string),
 		}
 
