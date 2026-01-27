@@ -1,6 +1,6 @@
 package candles
 
-import "candles-service/internal/domain/candles/enums"
+import "candles-service/internal/src/domain/candles/enums"
 
 type CandleCreateDTO struct {
 	City          string            `json:"city" binding:"required"`
