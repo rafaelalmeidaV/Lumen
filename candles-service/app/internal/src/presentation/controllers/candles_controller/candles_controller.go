@@ -61,9 +61,17 @@ func (h *CandleHandlers) create(c *gin.Context) {
 }
 
 func (h *CandleHandlers) getByID(c *gin.Context) {
+	_, exists := c.Get("currentUser")
+	
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "user not found"})
+		return
+	} 
+
 	id := c.Param("id")
 
 	candle, err := h.getByIDUC.Execute(c.Request.Context(), id)
+
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 		return

@@ -6,6 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+type contextKey string
+
+const CurrentUserKey contextKey = "currentUser"
 
 func JWTMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -15,15 +18,22 @@ func JWTMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "formato de token inválido"})
+			return
+		}
+
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
 		claims, err := ParseAndValidate(tokenString)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "token inválido"})
 			return
 		}
 
-		c.Set("claims", claims)
+		authUser := claims
+
+		c.Set(string(CurrentUserKey), authUser)
 		c.Next()
 	}
 }
