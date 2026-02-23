@@ -18,6 +18,11 @@ fi
 ) &
 
 (
+  cd ./client/app || exit
+  npx vite --host
+) &
+
+(
   docker start keycloak 2>/dev/null || true
 ) &
 
