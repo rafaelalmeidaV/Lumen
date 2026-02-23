@@ -96,7 +96,15 @@ async function handleCallback() {
   document.getElementById("output").textContent =
     JSON.stringify(tokens, null, 2);
 
-  // limpa a URL (remove ?code=...)
+  const copyBtn = document.createElement("button");
+  copyBtn.textContent = "Copy Access Token";
+  copyBtn.className = "mt-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700";
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText(tokens.access_token);
+  };
+  document.getElementById("output").appendChild(copyBtn);
+
+
   window.history.replaceState({}, document.title, "/");
 }
 
