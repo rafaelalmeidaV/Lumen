@@ -5,10 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
-    port: 80,
+    port: 5173,
     strictPort: true,
-    hmr: {
-      host: 'lumen.client.local'
-    }
   }
 })

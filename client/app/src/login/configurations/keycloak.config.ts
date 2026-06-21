@@ -1,18 +1,16 @@
 import type { KeycloakConfig } from '../types/Ikeycloak.config'
 
-const requiredEnv = (key: string): string => {
+const env = (key: string, fallback: string): string => {
   const value = import.meta.env[key as keyof ImportMetaEnv]
-  if (!value) {
-    throw new Error(`Missing env variable: ${key}`)
-  }
-  return value as string
+  return value ? String(value) : fallback
 }
 
 export const CONFIG: KeycloakConfig = {
-  KEYCLOAK_BASE: requiredEnv('VITE_KEYCLOAK_BASE_URL'),
-  REALM: requiredEnv('VITE_KEYCLOAK_REALM'),
-  CLIENT_ID: requiredEnv('VITE_CLIENT_ID'),
-  REDIRECT_URI: requiredEnv('VITE_KEYCLOAK_INTERNAL_URL')
+  KEYCLOAK_BASE: env('VITE_KEYCLOAK_BASE_URL', 'http://lumen.auth.local'),
+  REALM: env('VITE_KEYCLOAK_REALM', 'Lumen'),
+  CLIENT_ID: env('VITE_CLIENT_ID', 'public'),
+  REDIRECT_URI: env('VITE_KEYCLOAK_REDIRECT_URI', window.location.origin + '/'),
+  CANDLES_API_URL: env('VITE_CANDLES_API_URL', 'http://lumen.candles.local')
 }
 
 export const AUTH_ENDPOINT =

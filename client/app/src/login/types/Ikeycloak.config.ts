@@ -3,4 +3,5 @@ export interface KeycloakConfig {
   REALM: string
   CLIENT_ID: string
   REDIRECT_URI: string
+  CANDLES_API_URL: string
 }

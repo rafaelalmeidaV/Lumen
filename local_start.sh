@@ -19,7 +19,7 @@ fi
 
 (
   cd ./client/app || exit
-  npx vite --host
+  sudo npx vite --host
 ) &
 
 (
